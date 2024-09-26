@@ -1,0 +1,51 @@
+{
+  "name": "bitframes",
+  "version": "1.0.0",
+  "description": "a renderer for the bitframes artwork",
+  "type": "module",
+  "main": "index.js",
+  "license": "MIT",
+  "author": {
+    "name": "Matt DesLauriers",
+    "url": "https://github.com/mattdesl"
+  },
+  "dependencies": {
+    "@noble/hashes": "^1.5.0",
+    "@texel/color": "^1.1.3",
+    "canvas-sketch-util": "^1.10.0"
+  },
+  "scripts": {
+    "zip": "cd www && zip -r ../upload.zip ./ -x '.*' -x '__MACOSX'",
+    "palette": "node tools/generate-palette.js > src/palette.js && prettier --write src/palette.js",
+    "build": "esbuild test/onchain.js --bundle --minify --format=iife | terser --comments=false --compress --output www/script.js -- && wc -c < www/script.js"
+  },
+  "keywords": [
+    "bitframes",
+    "artwork",
+    "gen",
+    "gen",
+    "art",
+    "generative",
+    "2d",
+    "canvas",
+    "realtime",
+    "algorithmic"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mattdesl/bitframes.git"
+  },
+  "homepage": "https://github.com/mattdesl/bitframes",
+  "bugs": {
+    "url": "https://github.com/mattdesl/bitframes/issues"
+  },
+  "devDependencies": {
+    "canvas": "^2.11.2",
+    "canvas-sketch": "^0.7.7",
+    "esbuild": "^0.23.1",
+    "gifenc": "^1.0.3",
+    "prettier": "^3.3.3",
+    "serve": "^14.2.3",
+    "terser": "^5.32.0"
+  }
+}

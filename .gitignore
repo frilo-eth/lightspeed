@@ -1,0 +1,8 @@
+bower_components
+node_modules
+*.log
+.DS_Store
+tmp/
+*.zip
+www/script.js
+test/xkcd-color-names.txt

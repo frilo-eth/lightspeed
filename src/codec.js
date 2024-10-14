@@ -1,10 +1,10 @@
-import ECAIterator, { PatternFillMode, StandardRules } from "./eca.js";
+import ECAIterator, { FillMode, StandardRules } from "./eca.js";
 import {
   binaryStringToByteLE,
   byteToBinaryStringLE,
-  packBitsLE,
+  packFlags,
   packNibblesLE,
-  unpackBitsLE,
+  unpackFlags,
   unpackNibblesLE,
 } from "./bits.js";
 
@@ -14,29 +14,7 @@ export const LAYER_COUNT = 5;
 
 const GRID_SIZES = factorsOf(768, 16);
 
-// const GLOBAL_PALETTE = [];
-// for (let i = 0; i < 15; i++) {
-//   GLOBAL_PALETTE.push(INIT_PALETTE[i % INIT_PALETTE.length]);
-// }
-
-// "#e9e3d5",
-// export function colorOf(colorID) {
-//   return colorID <= 0
-//     ? null
-//     : GLOBAL_PALETTE[(colorID - 1) % GLOBAL_PALETTE.length];
-// }
-
-// export function getPalette() {
-//   // Colors are encoded as index=(encodedValue-1)
-//   // Where an index of 0x00 means "hidden" or "transparent"
-//   return INIT_PALETTE.palette.slice();
-// }
-
-// export function getBackground() {
-//   return INIT_PALETTE.background;
-// }
-
-export { PatternFillMode, StandardRules };
+export { FillMode, StandardRules };
 
 export const FlipMode = {
   NONE: 0x00,
@@ -121,7 +99,7 @@ export function construct(opts = {}, cb = () => {}) {
   // layer is empty, we can skip it
   if (colorA === 0 && colorB === 0) return;
 
-  const flip = layer.flip ?? 0x00;
+  const flipMode = layer.flipMode ?? 0x00;
   const patternScale = layer.scale ?? 1;
   const dimensions = layer.dimensions ?? [0, 0];
 
@@ -130,11 +108,11 @@ export function construct(opts = {}, cb = () => {}) {
   const patternColumns = patternScale === 0 ? 8 : cols * patternScale;
   const cellSkip = GRID_SIZES[layer.skip ?? 0];
 
-  let skipThreshold = 8;
-  if (layer.skipMode == SkipMode.COLUMNS) skipThreshold = cols;
+  let skipBoundary = 8;
+  if (layer.skipMode == SkipMode.COLUMNS) skipBoundary = cols;
   else if (layer.skipMode == SkipMode.SCALED_COLUMNS)
-    skipThreshold = patternColumns;
-  else if (layer.skipMode == SkipMode.EQUAL) skipThreshold = cellSkip;
+    skipBoundary = patternColumns;
+  else if (layer.skipMode == SkipMode.EQUAL) skipBoundary = cellSkip;
 
   const cellIterator = ECAIterator(
     typeof layer.pattern === "string"
@@ -143,7 +121,7 @@ export function construct(opts = {}, cb = () => {}) {
     layer.rule,
     patternColumns,
     layer.wrap,
-    layer.fill
+    layer.fillMode
   );
 
   let cellCount = 0;
@@ -155,18 +133,18 @@ export function construct(opts = {}, cb = () => {}) {
 
     let increment = 1;
     pointer++;
-    if (pointer >= skipThreshold) {
+    if (pointer >= skipBoundary) {
       // reached end of pattern, see if we should skip ahead
       pointer = 0;
       increment = cellSkip;
     }
     const curColor = isBitOn ? colorA : colorB;
     if (curColor > 0) {
-      if (flip === FlipMode.HORIZONTAL) {
+      if (flipMode === FlipMode.HORIZONTAL) {
         x = cols - x - 1;
-      } else if (flip === FlipMode.VERTICAL) {
+      } else if (flipMode === FlipMode.VERTICAL) {
         y = rows - y - 1;
-      } else if (flip === FlipMode.BOTH) {
+      } else if (flipMode === FlipMode.BOTH) {
         x = cols - x - 1;
         y = rows - y - 1;
       }
@@ -191,7 +169,11 @@ export function construct(opts = {}, cb = () => {}) {
 export function encode(doc = {}) {
   const bytes = new Uint8Array(32);
 
+  const system = doc.system || 0;
   const layers = doc.layers || [];
+
+  // System palette and surround
+  bytes[0] = system;
 
   // Frame, i.e. how far to offset all the cells
   bytes[1] = Math.max(doc.frame || 0x00, 0) & 0xff;
@@ -199,13 +181,7 @@ export function encode(doc = {}) {
   let offset = 2;
   for (let layer of layers) {
     // Flags
-    bytes[offset++] = packBitsLE([
-      [layer.visible ? 0x01 : 0x00, 1], // 1 bit
-      [layer.skipMode, 2], // 2 bits
-      [layer.fill, 2], // 2 bits
-      [layer.flip, 2], // 2 bits
-      [layer.wrap ? 0x01 : 0x00, 1], // 1 bit
-    ]);
+    bytes[offset++] = packFlags(layer);
     // Colors
     bytes[offset++] = packNibblesLE(layer.colors);
     // Columns, Rows
@@ -225,10 +201,13 @@ export function encode(doc = {}) {
 
 export function decode(bytes) {
   if (bytes.length < 32) throw new Error("expected 32 byte array");
-  if (bytes[0] !== 0) throw new Error("Expected version 0 for first byte");
+  if (bytes[0] !== 0 && bytes[0] !== 1) {
+    throw new Error("Expected system 0 or 1 for first byte");
+  }
 
   const layers = [];
   const doc = {
+    system: bytes[0],
     layers,
     frame: bytes[1],
   };
@@ -238,18 +217,9 @@ export function decode(bytes) {
   let i = 0;
   while (offset < bytes.length) {
     i++;
-    const flags = unpackBitsLE(bytes[offset++], [
-      ["visible", 1],
-      ["skipMode", 2],
-      ["fill", 2],
-      ["flip", 2],
-      ["wrap", 1],
-    ]);
-
+    const flags = unpackFlags(bytes[offset++]);
     const colorByte = bytes[offset++];
-
-    let colors = unpackNibblesLE(colorByte);
-
+    const colors = unpackNibblesLE(colorByte);
     const dimensions = unpackNibblesLE(bytes[offset++]);
     const pattern = byteToBinaryStringLE(bytes[offset++]);
     const rule = bytes[offset++];
@@ -257,7 +227,7 @@ export function decode(bytes) {
 
     // Construct layer object from unpacked data
     const layer = {
-      visible: flags.visible === 0x01,
+      visible: flags.visible,
       colors,
       dimensions,
       pattern,
@@ -265,9 +235,9 @@ export function decode(bytes) {
       scale: scaleAndSkip[0],
       skip: scaleAndSkip[1],
       skipMode: flags.skipMode,
-      fill: flags.fill,
-      flip: flags.flip,
-      wrap: flags.wrap === 0x01,
+      fillMode: flags.fillMode,
+      flipMode: flags.flipMode,
+      wrap: flags.wrap,
     };
 
     layers.push(layer);

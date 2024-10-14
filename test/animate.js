@@ -1,44 +1,70 @@
 import canvasSketch from "canvas-sketch";
-import { renderToCanvas } from "../src/render";
+import { renderStats, renderToCanvas } from "../src/render";
 import PRNG from "../src/prng";
-import { createRandomVisibleEncoding } from "../src/util";
+import {
+  createRandomGoodEncoding,
+  createRandomVisibleEncoding,
+} from "../src/util";
 import { encodingToHex, hexToEncoding } from "../src/codec";
+import { getPalette } from "../src/colors";
 
 const random = PRNG();
 
-const colorSpace = "srgb";
+const colorSpace = "display-p3";
 const settings = {
   attributes: {
-    colorSpace,
+    // colorSpace,
   },
-  fps: 12,
+  fps: 6,
   playbackRate: "throttle",
-  animate: true,
+  // animate: true,
   totalFrames: 256,
   dimensions: [2048, 2048],
 };
 
 const sketch = (props) => {
-  const encoding = hexToEncoding(
-    "00001ea3e9a46af35deda5619292f6f8b983c7628ed09242f78887fad918638a"
-  );
-  // const encoding = createRandomVisibleEncoding();
+  // const encoding = hexToEncoding(
+  //   "01008378ca1eb972010a48fd95ce05197944d609839c92d96b6f838df30dcaaa"
+  // );
+  const encoding = createRandomGoodEncoding(random, {
+    system: 1,
+  });
   props.update({ suffix: encodingToHex(encoding) });
+
+  const stats = renderStats({ encoding });
+
+  const palette = getPalette({
+    system: encoding[0],
+    colorSpace: props.context.getContextAttributes().colorSpace,
+  });
 
   return ({ context, width, height, frame }) => {
     context.fillStyle = "white";
     context.fillRect(0, 0, width, height);
 
     const newEncoding = encoding.slice();
+    newEncoding[1] = frame;
     // newEncoding[1] = Math.random() * 0xff;
 
     renderToCanvas({
+      // hatch: false,
       encoding: newEncoding,
-      colorSpace,
+      // palette: ["orange", "red", "blue", "green"],
+      // translation: 0,
       context,
       width,
       height,
     });
+
+    // const cw = 1;
+    // const ch = 1;
+    // for (let y = 0; y < stats.width; y++) {
+    //   for (let x = 0; x < stats.height; x++) {
+    //     const id = stats.paint[x + y * stats.width];
+    //     context.fillStyle = palette[id];
+    //     context.fillRect(x * cw, y * ch, cw, ch);
+    //   }
+    // }
   };
 };
 

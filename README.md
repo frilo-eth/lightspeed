@@ -1,28 +1,28 @@
 # bitframes
 
-Bitframes is an open source codec for generative art, contained within 32 bytes of data. Each stream of 32 bytes represents a single composition, that can be realized as a digital or print artwork. This repository contains the technical details and codec specification, but more details about the release of the artwork, and how it is being used to help crowdfund a documentary film, can be found on the [bitframes website](https://bitframes.io/).
+Bitframes is an open source codec for generative art, contained within 32 bytes of data. Each stream of 32 bytes represents a single composition, that can be realized as a digital or print artwork. This repository contains the technical details and codec specification, but more details about the release of the artwork, and how it is being used to help crowdfund a documentary film about the history of Generative Art, can be found on the [Bitframes website](https://bitframes.io/).
 
 ## Contents
 
-- About
+- Read More
 - Codec
 - Protocol
 - Running Locally
 
-## About
+## Read More
 
 The Bitframes project has two distinct aspects:
 
-1. Codec: This is the specification for how an _encoding_ (32 bytes of data) are mapped to a visual artwork. This is language and environment independent, although a reference implementation exists for JavaScript.
-2. Protocol: This is a series of contracts on Ethereum L1 EVM that acts as the payment and storage mechanisms for an online and distributed art gallery, that is used during the crowdfund. The contract also contains a list of all the _encodings_ published by the crowdfund backers.
+- **Codec** (spec here)
+  - This is the specification for how an _encoding_ (32 bytes of data) is mapped to a visual artwork. This is language and environment independent, although a reference implementation exists for JavaScript.
+- **Protocol** (repo here)
+  - This is a series of contracts on Ethereum L1 EVM that acts as the payment and storage mechanisms for an online and distributed art gallery, that is used during the crowdfund. The contract also contains a list of all the _encodings_ published by the crowdfund backers.
 
-## Codec
+## Crowdfund
 
-You can read more technical details about the codec here.
+Bitframes was released as a month-long public crowdfund ('open edition ERC721 mint') on Ethereum L1, with 100% of all net proceeds from minting being directed toward the development of a feature-length documentary film on the history of Generative Art, being directed by Tordoff Films Ltd in the UK.
 
-## Protocol
-
-You can read more technical details about the protocol here.
+See the [Bitframes website](https://bitframes.io/) for details and to participate.
 
 ## Running Locally
 

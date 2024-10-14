@@ -1,16 +1,13 @@
-import {
-  LAYER_COUNT,
-  construct,
-  decode,
-  getPalette,
-  getGridSizes,
-} from "./codec.js";
+import { LAYER_COUNT, construct, decode, getGridSizes } from "./codec.js";
+import { getPalette } from "./colors.js";
 import drawRoundedSegment from "./drawRoundedSegment.js";
 import PRNG from "./prng.js";
 
 // export const DEFAULT_BACKGROUND = "#e9e2d4"; // Lr=0.9, C=0.02, H=85deg
 export const DEFAULT_LINE_WIDTH_FACTOR = 0.005;
 export const DEFAULT_MARGIN_FACTOR = 0.1;
+export const SYSTEM_1_MARGIN_SCALE = 1;
+const SUPPORTED_COLOR_SPACES = ["srgb", "display-p3"];
 
 const lerp = (min, max, t) => min * (1 - t) + max * t;
 
@@ -31,6 +28,64 @@ function toSeed(encoding) {
   return hex;
 }
 
+export function renderStats(opts = {}) {
+  let min = [Infinity, Infinity];
+  let max = [-Infinity, -Infinity];
+
+  const encoding = opts.encoding;
+  const system = encoding[0];
+  const [width, height] = [256, 256];
+  const margin = 0;
+  const size = [width, height];
+  let totalVisibleCells = 0;
+  let colors = new Set();
+  let ids = new Set();
+  const paint = new Uint8Array(width * height);
+  createRenderer({
+    ...opts,
+    margin,
+    width,
+    height,
+    cell: (px, py, cw, ch, color, id) => {
+      totalVisibleCells++;
+      ids.add(id);
+      for (let y = py; y < py + ch; y++) {
+        for (let x = px; x < px + cw; x++) {
+          const idx = x + y * width;
+          if (idx >= 0 && idx < paint.length) {
+            paint[idx] = id;
+          }
+        }
+      }
+    },
+    fill: (path, color, alpha = 1) => {
+      colors.add(color);
+
+      path.forEach((point) => {
+        for (let c = 0; c < point.length; c++) {
+          min[c] = Math.min(min[c], point[c]);
+          max[c] = Math.max(max[c], point[c]);
+        }
+      });
+    },
+    hatch: false,
+    hatchContours: false,
+  });
+  const bounds = [min, max];
+  const boundsRatio = [(max[0] - min[0]) / width, (max[1] - min[1]) / height];
+  return {
+    paint,
+    system: opts.encoding[0],
+    width,
+    height,
+    colors,
+    ids,
+    totalVisibleCells,
+    totalPathBounds: bounds,
+    boundsRatio: boundsRatio,
+  };
+}
+
 export function createRenderer(opts = {}) {
   const {
     encoding,
@@ -45,19 +100,28 @@ export function createRenderer(opts = {}) {
   if (!encoding) throw new Error("must specify encoding");
   if (!width || !height) throw new Error("must specify width and height");
 
-  const { layers, frame } = decode(encoding);
+  const { layers, frame, system = 0 } = decode(encoding);
   const random = PRNG(toSeed(encoding));
 
-  const palette = opts.palette ?? getPalette(colorSpace);
+  // const palette = opts.palette ?? getPalette(colorSpace);
+  const palette = opts.palette ?? getPalette({ colorSpace, system });
 
   const jitter = 1;
   const gauss = 0.0001;
   const minDim = Math.min(width, height);
   const gaussDim = minDim * gauss;
 
-  const lineWidth = opts.lineWidth ?? DEFAULT_LINE_WIDTH_FACTOR * minDim;
-  const margin = opts.margin ?? DEFAULT_MARGIN_FACTOR * minDim;
+  const defaultMarginFactor =
+    system == 1
+      ? SYSTEM_1_MARGIN_SCALE * DEFAULT_MARGIN_FACTOR
+      : DEFAULT_MARGIN_FACTOR;
+  const margin = opts.margin ?? defaultMarginFactor * minDim;
+  const innerDim = Math.min(width - margin * 2, height - margin * 2);
+  const lineWidth = opts.lineWidth ?? DEFAULT_LINE_WIDTH_FACTOR * minDim * 1.0;
   const background = opts.background ?? palette[0];
+
+  // b&w will skip layer translations to avoid thin white lines on edges
+  const translation = opts.translation ?? (system == 1 ? 0 : 1);
 
   const lineJoin = hatch ? "round" : "miter";
   const lineCap = "round";
@@ -100,7 +164,7 @@ export function createRenderer(opts = {}) {
       // Each layer is shifted by some translation
       // To mimic the screen print process
       const [layerX, layerY] = random.insideCircle(
-        random.gaussian(0, gaussDim * 10 * jitter)
+        random.gaussian(0, gaussDim * translation * 10 * jitter)
       );
 
       // In addition, each color in the layer is also shifted when being applied
@@ -108,7 +172,7 @@ export function createRenderer(opts = {}) {
         .fill()
         .map(() => {
           return random.insideCircle(
-            random.gaussian(0, gaussDim * 10 * jitter)
+            random.gaussian(0, gaussDim * translation * 10 * jitter)
           );
         });
 
@@ -126,7 +190,7 @@ export function createRenderer(opts = {}) {
         const color = palette[Math.max(1, Math.min(palette.length - 1, id))];
 
         if (opts.cell) {
-          opts.cell(px, py, cw, ch, color);
+          opts.cell(px, py, cw, ch, color, id);
         }
 
         if (hatch) {
@@ -152,7 +216,8 @@ export function createRenderer(opts = {}) {
             hatchContours,
             roundSegments,
             opts.fill,
-            opts.segment
+            opts.segment,
+            1
           );
         } else {
           // a single shape in this group - just the rectangle path
@@ -180,7 +245,8 @@ function createHighResShapeList(
   hatchContours,
   roundSegments,
   fill,
-  segment
+  segment,
+  roundness = 1
 ) {
   const pw = cellWidth;
   const ph = cellHeight;
@@ -221,10 +287,9 @@ function createHighResShapeList(
     const a = [kx1 + ac[0], ky1 + ac[1]];
     const b = [kx2 + bc[0], ky2 + bc[1]];
 
-    const ellipsoid = Math.max(
-      0.0,
-      Math.min(0.5, random.gaussian(0.25, (0.25 / 2) * jitter))
-    );
+    const ellipsoid =
+      Math.max(0.0, Math.min(0.5, random.gaussian(0.25, (0.25 / 2) * jitter))) *
+      roundness;
 
     if (hatchContours && roundSegments > 0) {
       const path = drawRoundedSegment(
@@ -254,8 +319,21 @@ function toRoundedVerts(x, y, cols, rows) {
 export function renderToCanvas(opts = {}) {
   const { context, width, height } = opts;
   if (!context) throw new Error("must specify { context } to render to");
+  let { colorSpace } = opts;
+  if (typeof context.getContextAttributes === "function") {
+    const ret = context.getContextAttributes();
+    if (ret && ret.colorSpace) {
+      colorSpace = ret.colorSpace;
+    }
+  }
+
+  if (!colorSpace || !SUPPORTED_COLOR_SPACES.includes(colorSpace)) {
+    colorSpace = "srgb";
+  }
+
   createRenderer({
     ...opts,
+    colorSpace,
     width,
     height,
     setup: ({ background, lineJoin, lineWidth, lineCap }) => {
@@ -263,8 +341,13 @@ export function renderToCanvas(opts = {}) {
       context.lineWidth = lineWidth;
       context.lineCap = lineCap;
       context.globalAlpha = 1;
+      // context.fillStyle = background;
+      // const m =
+      //   DEFAULT_MARGIN_FACTOR * SYSTEM_1_MARGIN_SCALE * Math.min(width, height);
       context.fillStyle = background;
       context.fillRect(0, 0, width, height);
+      // context.fillStyle = "pink";
+      // context.fillRect(m, m, width - m * 2, height - m * 2);
     },
     fill: (path, color, alpha) => {
       context.fillStyle = color;

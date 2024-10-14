@@ -1,29 +1,37 @@
 import { decode, encodingToHex, hexToEncoding } from "../src/codec.js";
-import { createRandomVisibleEncoding } from "../src/util.js";
-import PRNG from "../src/prng.js";
+import {
+  createRandomEncoding,
+  createRandomGoodEncoding,
+  createRandomVisibleEncoding,
+} from "../src/util.js";
+import PRNG, { randomSeed } from "../src/prng.js";
 import {
   createRenderer,
   DEFAULT_BACKGROUND,
   renderToCanvas,
 } from "../src/render.js";
 
+const prng = PRNG("" || randomSeed());
+console.log(prng.getSeed());
 const SIZE = 128;
 document.body.style.cssText = `
   width: 100%;
   height: 100%;
-  grid-template-columns: repeat(auto-fill, minmax(${SIZE}px, 1fr));
-  grid-gap: 10px;
-  padding: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(${SIZE}px, 1fr));
+  grid-gap: 5px;
+  padding: 0px;
   box-sizing: border-box;
   display: grid;
 `;
 
 const queue = [];
 
-for (let i = 0; i < 35; i++) {
-  const encoding = createRandomVisibleEncoding();
+for (let i = 0; i < 10; i++) {
+  const encoding = createRandomGoodEncoding(prng);
   const canvas = document.createElement("canvas");
-  const context = canvas.getContext("2d");
+  const context = canvas.getContext("2d", {
+    colorSpace: "display-p3",
+  });
   const width = SIZE * 3;
   const height = SIZE * 3;
   const container = document.createElement("div");
@@ -37,6 +45,13 @@ for (let i = 0; i < 35; i++) {
   `;
   canvas.width = width;
   canvas.height = height;
+
+  canvas.onclick = () => {
+    const stats = renderStats({
+      encoding,
+    });
+    console.log(encodingToHex(encoding), stats);
+  };
 
   queue.push(() => {
     renderToCanvas({

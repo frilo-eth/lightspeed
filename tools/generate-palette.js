@@ -37,22 +37,6 @@ const colorSpace = "srgb";
 const gamut = Color.listColorGamuts().find((n) => n.space.id === colorSpace);
 console.error("Color Space:", gamut.space.id);
 
-const colors = primariesLHData.map(([name, coords]) => {
-  const [Lr, H, C = maxChroma] = coords;
-
-  // Convert OKLr to OKL
-  // We use a different lightness estimate for these colors
-  // that is more suited for a fixed range with a known whitepoint
-  // this is also the lightness estimate used by OKHSL and is closer to CIELAB
-
-  // Gamut map with a constant L
-  // This is equivalent to fully saturating the coordinate
-  // by projecting it along chroma axis until it either hits the target C value,
-  // or the boundary of the target gamut, whichever comes first
-
-  return toColorData(name, Lr, C, H);
-});
-
 function toColorData(name, Lr, C, H) {
   const oklch = [LrToL(Lr), C, H];
   return {
@@ -81,6 +65,82 @@ function toColorData(name, Lr, C, H) {
   };
 }
 
+const colors = primariesLHData.map(([name, coords]) => {
+  const [Lr, H, C = maxChroma] = coords;
+
+  // Convert OKLr to OKL
+  // We use a different lightness estimate for these colors
+  // that is more suited for a fixed range with a known whitepoint
+  // this is also the lightness estimate used by OKHSL and is closer to CIELAB
+
+  // Gamut map with a constant L
+  // This is equivalent to fully saturating the coordinate
+  // by projecting it along chroma axis until it either hits the target C value,
+  // or the boundary of the target gamut, whichever comes first
+
+  return toColorData(name, Lr, C, H);
+});
+
+// const palettePICO8 = [
+//   "#000000",
+//   "#1d2b53",
+//   "#7e2553",
+//   "#008751",
+//   "#ab5236",
+//   "#5f574f",
+//   "#c2c3c7",
+//   "#fff1e8",
+//   "#ff004d",
+//   "#ffa300",
+//   "#ffec27",
+//   "#00e436",
+//   "#29adff",
+//   "#83769c",
+//   "#ff77a8",
+//   "#ffccaa",
+// ];
+
+// const palettePICO8 = [
+//   "#000000",
+//   "#404040",
+//   "#808080",
+//   "#C0C0C0",
+//   "#FFFFFF",
+//   "#582C04",
+//   "#907038",
+//   "#DC0808",
+//   "#FF6404",
+//   "#FCF404",
+//   "#006410",
+//   "#20B814",
+//   "#4800A4",
+//   "#0000D4",
+//   "#00ACE8",
+//   "#F00884",
+// ];
+
+// const colors = Array(16)
+//   .fill()
+//   .map((_, i) => {
+//     const hex = palettePICO8[i % palettePICO8.length];
+//     const rgb = Color.hexToRGB(hex);
+//     const oklch = Color.convert(rgb, Color.sRGB, Color.OKLCH);
+//     oklch[0] = LToLr(oklch[0]);
+
+//     return {
+//       srgb: hex,
+//       name: i,
+//       oklrch: oklch,
+//     };
+//   });
+
+// const colors = Array(15)
+//   .fill()
+//   .map((_, i, lst) => {
+//     const t = i / (lst.length - 1);
+//     return toColorData(`color_${i}`, [0.0, 0.65, 1][i % 3], 0.0, 0);
+//   });
+// colors.unshift(toColorData("background", 0.125, 0, 0));
 colors.unshift(toColorData("background", 0.9, 0.02, 85));
 
 const palette = colors;

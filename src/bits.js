@@ -25,43 +25,6 @@ export function binaryStringToByteLE(binaryStr) {
   return byte;
 }
 
-export function packBitsLE(fields) {
-  let result = 0;
-  let currentBit = 0;
-
-  for (let i = 0; i < fields.length; i++) {
-    const [value, size] = fields[i];
-    if (currentBit + size > 8) {
-      throw new Error("total bits exceed 8");
-    }
-    // Mask the value to ensure it fits within the specified bit size
-    const mask = (1 << size) - 1;
-    const valueToPack = (value & mask) << currentBit;
-    result |= valueToPack;
-    currentBit += size;
-  }
-
-  return result;
-}
-
-export function unpackBitsLE(byte, fields) {
-  let result = {};
-  let currentBit = 0;
-
-  for (let [name, size] of fields) {
-    if (currentBit + size > 8) {
-      throw new Error("total bits exceed 8");
-    }
-    const mask = (1 << size) - 1;
-    const value = (byte >> currentBit) & mask;
-    if (name in result) throw new Error("duplicate field name in table");
-    result[name] = value;
-    currentBit += size;
-  }
-
-  return result;
-}
-
 export function packNibblesLE([lowNibble, highNibble]) {
   const mask = 0x0f; // Mask to ensure only the lowest 4 bits are considered
   // Apply the mask to both nibbles and shift the high nibble by 4 bits to the left
@@ -74,30 +37,22 @@ export function unpackNibblesLE(byte) {
   return [lowNibble, highNibble];
 }
 
-export function unpackBooleansLE(byte, bitCount = 8) {
-  if (byte < 0 || byte > 255) {
-    throw new Error("must be a byte (0-255)");
-  }
-  const booleans = [];
-  for (let i = 0; i < bitCount; i++) {
-    // Only first N bits are processed
-    // Shift right by 'i' and check if the least significant bit is 1
-    booleans.push(((byte >> i) & 1) === 1);
-  }
-  return booleans;
+export function packFlags(layer) {
+  let result = 0;
+  result |= ((layer.visible ? 1 : 0) & 0x01) << 0;
+  result |= (layer.skipMode & 0x03) << 1;
+  result |= (layer.fillMode & 0x03) << 3;
+  result |= (layer.flipMode & 0x03) << 5;
+  result |= ((layer.wrap ? 1 : 0) & 0x01) << 7;
+  return result;
 }
 
-export function packBooleansLE(booleans) {
-  if (booleans.length > 8) {
-    throw new Error("array length cannot exceed ");
-  }
-  let byte = 0;
-  for (let i = 0; i < booleans.length; i++) {
-    if (booleans[i]) {
-      // Only set the bit if the boolean is true
-      // Set the bit at position 'i'
-      byte |= 1 << i;
-    }
-  }
-  return byte;
+export function unpackFlags(byte) {
+  return {
+    visible: Boolean((byte >> 0) & 0x01),
+    skipMode: (byte >> 1) & 0x03,
+    fillMode: (byte >> 3) & 0x03,
+    flipMode: (byte >> 5) & 0x03,
+    wrap: Boolean((byte >> 7) & 0x01),
+  };
 }

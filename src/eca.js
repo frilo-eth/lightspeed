@@ -1,6 +1,6 @@
 import { byteToBinaryStringLE } from "./bits.js";
 
-export const PatternFillMode = {
+export const FillMode = {
   REPEAT: 0x00,
   LEFT: 0x01,
   RIGHT: 0x02,
@@ -39,17 +39,17 @@ export default function ECAIterator(
     // by default, just repeat the pattern to fill the size we want
     // but in some cases we might want to left align the pattern and fill the rest with zeroes
     // or for example fill the pattern in the center (rounded) and pad the rest with zeroes
-    if (fill === 0x00) {
+    if (fill === FillMode.REPEAT) {
       // repeat
       currentPattern[i] = pattern[i % pattern.length];
-    } else if (fill === 0x01) {
+    } else if (fill === FillMode.LEFT) {
       // left
       currentPattern[i] = i < pattern.length ? pattern[i] : 0;
-    } else if (fill === 0x02) {
+    } else if (fill === FillMode.RIGHT) {
       // right
       currentPattern[i] =
         i < size - pattern.length ? 0 : pattern[i - (size - pattern.length)];
-    } else if (fill === 0x03) {
+    } else if (fill === FillMode.CENTER) {
       // center
       const start = Math.floor((size - pattern.length) / 2);
       const end = start + pattern.length;

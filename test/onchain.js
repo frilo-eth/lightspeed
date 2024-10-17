@@ -1,13 +1,15 @@
 import { decode, encodingToHex, hexToEncoding } from "../src/codec.js";
 import { renderToCanvas } from "../src/render.js";
+import { createRandomCleanEncoding } from "../src/util.js";
 
 const DEFAULT_SIZE = 2048;
 
-const randomEncoding = () => {
-  const bytes = new Uint8Array(32);
-  for (let i = 2; i < 32; i++) bytes[i] = ~~(Math.random() * 256);
-  return bytes;
-};
+const randomEncoding = createRandomCleanEncoding();
+// const randomEncoding = () => {
+//   const bytes = new Uint8Array(32);
+//   for (let i = 2; i < 32; i++) bytes[i] = ~~(Math.random() * 256);
+//   return bytes;
+// };
 
 const config = globalThis.CONFIG || {};
 const W = config.W || globalThis;

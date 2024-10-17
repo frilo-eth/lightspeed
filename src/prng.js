@@ -40,7 +40,7 @@ export function randomSeed(n = 16) {
   return seed;
 }
 
-export default function PRNG(seed = randomSeed()) {
+export function PRNG(seed = randomSeed()) {
   let _seed;
   let _nextGaussian = null;
   let _hasNextGaussian = false;

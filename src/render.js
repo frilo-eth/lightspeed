@@ -1,7 +1,7 @@
 import { LAYER_COUNT, construct, decode, getGridSizes } from "./codec.js";
 import { getPalette } from "./colors.js";
 import drawRoundedSegment from "./drawRoundedSegment.js";
-import PRNG from "./prng.js";
+import { PRNG } from "./prng.js";
 
 // export const DEFAULT_BACKGROUND = "#e9e2d4"; // Lr=0.9, C=0.02, H=85deg
 export const DEFAULT_LINE_WIDTH_FACTOR = 0.005;

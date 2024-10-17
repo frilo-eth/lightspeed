@@ -1,6 +1,6 @@
 import { decode, encodingToHex, hexToEncoding } from "../src/codec.js";
 import { createRandomVisibleEncoding } from "../src/util.js";
-import PRNG from "../src/prng.js";
+import { PRNG } from "../src/prng.js";
 // import { writeFile } from "fs/promises";
 import * as path from "path";
 import {

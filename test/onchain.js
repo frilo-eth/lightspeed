@@ -63,7 +63,10 @@ let encoding;
 if (typeof hl !== "undefined" && hl.tx && hl.tx.customMintData) {
   try {
     const hex = hl.tx.customMintData.replace(/^0x/i, "");
-    if (hex.length) encoding = hexToEncoding(hex);
+    if (hex.length) {
+      encoding = hexToEncoding(hex);
+      encoding[0] = encoding[0] == 0x02 ? 0x01 : 0x00;
+    }
   } catch (err) {
     console.warn(err);
   }

@@ -1,6 +1,6 @@
 import canvasSketch from "canvas-sketch";
 import { renderToCanvas } from "../src/render";
-import PRNG from "../src/prng";
+import { PRNG } from "../src/prng";
 import { createRandomVisibleEncoding } from "../src/util";
 import {
   encodingToHex,

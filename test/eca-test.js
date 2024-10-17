@@ -1,7 +1,7 @@
 import { byteToBinaryLE } from "../src/bits.js";
 import { getGridSizes } from "../src/codec.js";
 import ECAIterator, { ECAIterator2 } from "../src/eca.js";
-import PRNG from "../src/prng.js";
+import { PRNG } from "../src/prng.js";
 
 const count = 100;
 

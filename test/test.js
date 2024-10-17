@@ -2,6 +2,9 @@ import test from "tape";
 import { packFlags, unpackFlags } from "../src/bits.js";
 import { encodingToHex, hexToEncoding } from "../src/codec.js";
 
+import * as bitframes from "../src/index.js";
+console.log("bit", bitframes);
+
 test("should encode/decode", async (t) => {
   const hex =
     "00001ea3e9a46af35deda5619292f6f8b983c7628ed09242f78887fad918638a";

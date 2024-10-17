@@ -1,7 +1,7 @@
 import { decode, encodingToHex, hexToEncoding } from "../src/codec.js";
 import {
   createRandomEncoding,
-  createRandomGoodEncoding,
+  createRandomCleanEncoding,
   createRandomVisibleEncoding,
 } from "../src/util.js";
 import PRNG, { randomSeed } from "../src/prng.js";
@@ -27,7 +27,7 @@ document.body.style.cssText = `
 const queue = [];
 
 for (let i = 0; i < 10; i++) {
-  const encoding = createRandomGoodEncoding(prng);
+  const encoding = createRandomCleanEncoding(prng);
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("2d", {
     colorSpace: "display-p3",

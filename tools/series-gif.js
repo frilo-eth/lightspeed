@@ -1,5 +1,5 @@
 import {
-  createRandomGoodEncoding,
+  createRandomCleanEncoding,
   createRandomVisibleEncoding,
 } from "../src/util.js";
 import { encode } from "png-tools";
@@ -16,15 +16,17 @@ import {
 } from "../src/codec.js";
 import { packNibblesLE } from "../src/bits.js";
 import GIFEnc from "gifenc";
-import PRNG from "../src/prng.js";
+import { PRNG } from "../src/prng.js";
 
 const { GIFEncoder, quantize, applyPalette } = GIFEnc;
 const prng = PRNG();
 
 const fps = 5;
-const totalFrames = 100;
+const totalFrames = 10;
 const size = 2048;
 
+const system = 1;
+const renderToGif = true;
 const margin = true;
 const zoom = false;
 const scale = 1;
@@ -35,12 +37,11 @@ const padding = zoom ? 0 : 0;
 const gif = GIFEncoder();
 
 for (let i = 0; i < totalFrames; i++) {
-  const encoding = createRandomGoodEncoding(prng);
+  const encoding = createRandomCleanEncoding(prng, { system, frame: 0 });
 
   const canvas = createCanvas(size * mult, size * mult);
 
   const context = canvas.getContext("2d");
-  // encoding[0] = 1;
   renderToCanvas({
     encoding,
     width: canvas.width,
@@ -60,20 +61,25 @@ for (let i = 0; i < totalFrames; i++) {
   zoomContext.drawImage(canvas, tx, ty, nw, nh);
 
   const imageData = zoomContext.getImageData(0, 0, width, height);
-  const png = encode({ width, height, data: imageData.data }, deflate);
-  // const palette = quantize(imageData.data, 256);
-  // const index = applyPalette(imageData.data, palette);
   console.log(`Writing frame ${i + 1} / ${totalFrames}`);
-  await writeFile(`tmp/${String(i).padStart(4, "0")}.png`, png);
-  // gif.writeFrame(index, width, height, { palette, delay: 1000 / fps });
+
+  if (renderToGif) {
+    const palette = quantize(imageData.data, 256);
+    const index = applyPalette(imageData.data, palette);
+    gif.writeFrame(index, width, height, { palette, delay: 1000 / fps });
+  } else {
+    const png = encode({ width, height, data: imageData.data }, deflate);
+    await writeFile(`tmp/${String(i).padStart(4, "0")}.png`, png);
+  }
 }
 
 // Write end-of-stream character
-// gif.finish();
+if (renderToGif) {
+  gif.finish();
 
-// Get the Uint8Array output of your binary GIF file
-// const output = gif.bytes();
-// await writeFile("tmp/output.gif", gif.bytes());
+  // Get the Uint8Array output of your binary GIF file
+  await writeFile("tmp/output.gif", gif.bytes());
+}
 // const encoding = hexToEncoding(
 //   "0000acbfa136f908075698e46b983d80fb1781db3945fc3ccf69484804c4241c"
 // );

@@ -8,8 +8,6 @@ import {
   unpackNibblesLE,
 } from "./bits.js";
 
-import COLOR_DATA from "./palette.js";
-
 export const LAYER_COUNT = 5;
 
 const GRID_SIZES = factorsOf(768, 16);
@@ -29,14 +27,6 @@ export const SkipMode = {
   SCALED_COLUMNS: 0x02,
   EQUAL: 0x03,
 };
-
-export function getPalette(colorSpace = "srgb") {
-  return COLOR_DATA.map((n) => n[colorSpace]);
-}
-
-export function getColorData() {
-  return COLOR_DATA.slice();
-}
 
 export function getGridSizes() {
   return GRID_SIZES.slice();

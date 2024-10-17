@@ -1,8 +1,8 @@
 import canvasSketch from "canvas-sketch";
 import { renderStats, renderToCanvas } from "../src/render";
-import PRNG from "../src/prng";
+import { PRNG } from "../src/prng";
 import {
-  createRandomGoodEncoding,
+  createRandomCleanEncoding,
   createRandomVisibleEncoding,
 } from "../src/util";
 import { encodingToHex, hexToEncoding } from "../src/codec";
@@ -26,7 +26,7 @@ const sketch = (props) => {
   // const encoding = hexToEncoding(
   //   "01008378ca1eb972010a48fd95ce05197944d609839c92d96b6f838df30dcaaa"
   // );
-  const encoding = createRandomGoodEncoding(random, {
+  const encoding = createRandomCleanEncoding(random, {
     system: 1,
   });
   props.update({ suffix: encodingToHex(encoding) });

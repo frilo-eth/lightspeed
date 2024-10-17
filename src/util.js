@@ -1,4 +1,4 @@
-import PRNG from "./prng.js";
+import { PRNG } from "./prng.js";
 import { encode, decode, constructCells, LAYER_COUNT } from "./codec.js";
 import { renderStats } from "./render.js";
 
@@ -9,7 +9,7 @@ const randomNibble = (random = defaultRandom) => random.rangeFloor(0, 16);
 const randomByte = (random = defaultRandom) => random.rangeFloor(0, 256);
 const randomCrumb = (random = defaultRandom) => random.pick([0, 1, 2, 3]);
 
-export function createRandomGoodEncoding(prng = defaultRandom, opts = {}) {
+export function createRandomCleanEncoding(prng = defaultRandom, opts = {}) {
   let encoding, stats;
   do {
     encoding = createRandomEncoding(prng, opts);
@@ -71,7 +71,7 @@ export function createRandomEncoding(
   });
 }
 
-export function createRandomLayer(random = defaultRandom) {
+function createRandomLayer(random = defaultRandom) {
   return {
     visible: random.boolean(), // 1 bit
     skipMode: randomCrumb(random), // 2 bits
@@ -87,10 +87,10 @@ export function createRandomLayer(random = defaultRandom) {
   };
 }
 
-export function createRandomVisibleEncoding(random = defaultRandom) {
+export function createRandomVisibleEncoding(random = defaultRandom, opts = {}) {
   let encoding;
   while (true) {
-    encoding = createRandomEncoding(random);
+    encoding = createRandomEncoding(random, opts);
     if (encodingHasVisibleCells(encoding)) {
       break;
     }
@@ -106,7 +106,7 @@ function getRandomVisibleColorPair(random) {
   return colors;
 }
 
-export function encodingHasVisibleCells(encoding) {
+function encodingHasVisibleCells(encoding) {
   const { layers, frame = 0 } = decode(encoding);
   for (let layer of layers) {
     const cells = constructCells({ layer, frame, maxCells: 1 });

@@ -5,6 +5,8 @@ import { createRandomCleanEncoding } from "../src/util.js";
 const DEFAULT_SIZE = 2048;
 
 const randomEncoding = createRandomCleanEncoding();
+
+// quick and dirty but a lot of poor results
 // const randomEncoding = () => {
 //   const bytes = new Uint8Array(32);
 //   for (let i = 2; i < 32; i++) bytes[i] = ~~(Math.random() * 256);
@@ -67,7 +69,6 @@ if (typeof hl !== "undefined" && hl.tx && hl.tx.customMintData) {
     const hex = hl.tx.customMintData.replace(/^0x/i, "");
     if (hex.length) {
       encoding = hexToEncoding(hex);
-      encoding[0] = encoding[0] == 0x02 ? 0x01 : 0x00;
     }
   } catch (err) {
     console.warn(err);

@@ -4,8 +4,6 @@ import { createRandomCleanEncoding } from "../src/util.js";
 
 const DEFAULT_SIZE = 2048;
 
-const randomEncoding = createRandomCleanEncoding();
-
 // quick and dirty but a lot of poor results
 // const randomEncoding = () => {
 //   const bytes = new Uint8Array(32);
@@ -76,7 +74,7 @@ if (typeof hl !== "undefined" && hl.tx && hl.tx.customMintData) {
 }
 
 if (!encoding) {
-  encoding = randomEncoding();
+  encoding = createRandomCleanEncoding();
 }
 
 if (config.L !== false) console.log(encodingToHex(encoding));

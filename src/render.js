@@ -11,6 +11,17 @@ const SUPPORTED_COLOR_SPACES = ["srgb", "display-p3"];
 
 const lerp = (min, max, t) => min * (1 - t) + max * t;
 
+const tmp2_0 = [0, 0];
+const tmp2_1 = [0, 0];
+const tmp2_2 = [0, 0];
+const tmp2_3 = [0, 0];
+
+const vec2Set = (vec, a, b) => {
+  vec[0] = a;
+  vec[1] = b;
+  return vec;
+};
+
 // export const DEFAULT_BACKGROUND = getBackground();
 const GRID_SIZES = getGridSizes();
 
@@ -101,6 +112,8 @@ export function createRenderer(opts = {}) {
   if (!width || !height) throw new Error("must specify width and height");
 
   const { layers, frame, system = 0 } = decode(encoding);
+  if (layers.length !== LAYER_COUNT) throw new Error("expected 5 layers");
+
   const random = PRNG(toSeed(encoding));
 
   // const palette = opts.palette ?? getPalette(colorSpace);
@@ -144,8 +157,6 @@ export function createRenderer(opts = {}) {
     });
   }
 
-  if (layers.length !== LAYER_COUNT) throw new Error("expected 5 layers");
-
   for (let i = 0; i < layers.length; i++) {
     const layer = layers[i];
     const horizontal = layerHorizontals[i];
@@ -163,9 +174,12 @@ export function createRenderer(opts = {}) {
 
       // Each layer is shifted by some translation
       // To mimic the screen print process
-      const [layerX, layerY] = random.insideCircle(
-        random.gaussian(0, gaussDim * translation * 10 * jitter)
+      const layerXY = random.insideCircle(
+        random.gaussian(0, gaussDim * translation * 10 * jitter),
+        tmp2_0
       );
+      const layerX = layerXY[0];
+      const layerY = layerXY[1];
 
       // In addition, each color in the layer is also shifted when being applied
       const colorOffsetMap = Array(2)
@@ -229,6 +243,8 @@ export function createRenderer(opts = {}) {
       });
     }
   }
+
+  if (opts.finish) opts.finish();
 }
 
 function createHighResShapeList(
@@ -262,7 +278,7 @@ function createHighResShapeList(
   );
 
   const lineOffset = (1 * curLineWidth) / 2;
-  const lineStart = (0 * curLineWidth) / 2;
+  const lineStart = (0 * curLineWidth) / 2; // ignored for now...
 
   for (let i = 0; i < lineCount; i++) {
     let kx1, ky1, kx2, ky2;
@@ -282,10 +298,16 @@ function createHighResShapeList(
 
     const alpha = Math.max(0.9, Math.min(1, random.gaussian(1, 0.1 * jitter)));
 
-    const ac = random.insideCircle(random.gaussian(0, gaussDim * jitter));
-    const bc = random.insideCircle(random.gaussian(0, gaussDim * jitter));
-    const a = [kx1 + ac[0], ky1 + ac[1]];
-    const b = [kx2 + bc[0], ky2 + bc[1]];
+    const ac = random.insideCircle(
+      random.gaussian(0, gaussDim * jitter),
+      tmp2_0
+    );
+    const bc = random.insideCircle(
+      random.gaussian(0, gaussDim * jitter),
+      tmp2_1
+    );
+    const a = vec2Set(tmp2_2, kx1 + ac[0], ky1 + ac[1]);
+    const b = vec2Set(tmp2_3, kx2 + bc[0], ky2 + bc[1]);
 
     const ellipsoid =
       Math.max(0.0, Math.min(0.5, random.gaussian(0.25, (0.25 / 2) * jitter))) *
@@ -309,11 +331,17 @@ function createHighResShapeList(
 
 function toRoundedVerts(x, y, cols, rows) {
   return [
-    [x, y],
-    [x + cols, y],
-    [x + cols, y + rows],
-    [x, y + rows],
-  ].map((vertex) => vertex.map((n) => Math.round(n)));
+    [Math.round(x), Math.round(y)],
+    [Math.round(x + cols), Math.round(y)],
+    [Math.round(x + cols), Math.round(y + rows)],
+    [Math.round(x), Math.round(y + rows)],
+  ];
+  // return [
+  //   [x, y],
+  //   [x + cols, y],
+  //   [x + cols, y + rows],
+  //   [x, y + rows],
+  // ].map((vertex) => vertex.map((n) => Math.round(n)));
 }
 
 export function renderToCanvas(opts = {}) {
@@ -336,7 +364,11 @@ export function renderToCanvas(opts = {}) {
     colorSpace,
     width,
     height,
+    finish: () => {
+      context.restore();
+    },
     setup: ({ background, lineJoin, lineWidth, lineCap }) => {
+      context.save();
       context.lineJoin = lineJoin;
       context.lineWidth = lineWidth;
       context.lineCap = lineCap;

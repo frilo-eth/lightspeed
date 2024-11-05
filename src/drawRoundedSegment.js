@@ -6,6 +6,8 @@
  * @author Matt DesLauriers (@mattdesl)
  */
 
+const tmp2_0 = [0, 0];
+
 export default function drawRoundedSegment(
   a,
   b,
@@ -63,11 +65,11 @@ export default function drawRoundedSegment(
 
 function drawEdge(out = [], a, b, dx, dy, rad) {
   // segment edge
-  [0, 1].forEach((t) => {
-    const px = lerp(a[0], b[0], t);
-    const py = lerp(a[1], b[1], t);
+  for (let i = 0; i < 2; i++) {
+    const px = lerp(a[0], b[0], i);
+    const py = lerp(a[1], b[1], i);
     out.push([px + dx * rad, py + dy * rad]);
-  });
+  }
 }
 
 function drawCap(
@@ -79,7 +81,7 @@ function drawCap(
   capSegments = 32,
   ellipsoid = 1
 ) {
-  const midPoint = lerpArray(prevPoint, nextPoint, 0.5); // Calculate midpoint
+  const midPoint = lerpArray(prevPoint, nextPoint, 0.5, tmp2_0); // Calculate midpoint
   const radius = vec2Dist(prevPoint, nextPoint) / 2; // Calculate radius
 
   for (let i = 0; i < capSegments; i++) {

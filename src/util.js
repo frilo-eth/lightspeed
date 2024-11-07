@@ -51,8 +51,9 @@ function isGoodStats(stats) {
   );
 }
 
-export function createEmptyEncoding() {
+export function createEmptyEncoding(opts = {}) {
   const bytes = new Uint8Array(32);
+  if (opts.system) bytes[0] = opts.system || 0;
   return bytes;
 }
 

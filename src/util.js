@@ -12,7 +12,9 @@ const randomCrumb = (random = defaultRandom) => random.pick([0, 1, 2, 3]);
 export function createRandomCleanEncoding(prng = defaultRandom, opts = {}) {
   let encoding, stats;
   do {
-    encoding = createRandomEncoding(prng, opts);
+    encoding = opts.createRandomEncoding
+      ? opts.createRandomEncoding(prng, opts)
+      : createRandomEncoding(prng, opts);
     stats = renderStats({
       encoding,
     });

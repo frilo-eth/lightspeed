@@ -72,7 +72,7 @@ export function createRandomEncoding(
   });
 }
 
-function createRandomLayer(random = defaultRandom) {
+export function createRandomLayer(random = defaultRandom) {
   return {
     visible: random.boolean(), // 1 bit
     skipMode: randomCrumb(random), // 2 bits

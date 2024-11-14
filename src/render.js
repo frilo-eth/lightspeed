@@ -26,10 +26,9 @@ const vec2Set = (vec, a, b) => {
 const GRID_SIZES = getGridSizes();
 
 function toSeed(encoding) {
-  // skip first two bytes when calculating a seed
-  const bytes = encoding.slice(2);
   let hex = "";
-  for (let byte of bytes) {
+  for (let i = 2; i < encoding.length; i++) {
+    let byte = encoding[i];
     // Ensure each element is a valid byte
     if (!Number.isInteger(byte) || byte < 0 || byte > 255) {
       throw new Error("each element in the array must be a byte (0-255)");
@@ -114,7 +113,8 @@ export function createRenderer(opts = {}) {
   const { layers, frame, system = 0 } = decode(encoding);
   if (layers.length !== LAYER_COUNT) throw new Error("expected 5 layers");
 
-  const random = PRNG(toSeed(encoding));
+  const seed = toSeed(encoding);
+  const random = PRNG(seed);
 
   // const palette = opts.palette ?? getPalette(colorSpace);
   const palette = opts.palette ?? getPalette({ colorSpace, system });
@@ -139,10 +139,9 @@ export function createRenderer(opts = {}) {
   const lineJoin = hatch ? "round" : "miter";
   const lineCap = "round";
 
-  const layerHorizontals = [];
-  for (let i = 0; i < LAYER_COUNT; i++) {
-    layerHorizontals.push(random.boolean());
-  }
+  // const layerHorizontals = [];
+  // const layerRandoms = [];
+  // console.log("seed", seed);
 
   if (opts.setup) {
     opts.setup({
@@ -158,8 +157,18 @@ export function createRenderer(opts = {}) {
   }
 
   for (let i = 0; i < layers.length; i++) {
+    const bytesPerLayer = 6;
+    const charsPerByte = 2;
+    const byteStart = i * bytesPerLayer;
+    const byteEnd = byteStart + bytesPerLayer;
+    const subSeed = seed.slice(
+      byteStart * charsPerByte,
+      byteEnd * charsPerByte
+    );
+    const random = PRNG(subSeed);
+
     const layer = layers[i];
-    const horizontal = layerHorizontals[i];
+    const horizontal = random.boolean();
     if (opts.layer) opts.layer(layer, horizontal);
 
     const dimensions = layer.dimensions ?? [0, 0];
@@ -170,8 +179,6 @@ export function createRenderer(opts = {}) {
     const hidden =
       layer.visible === false || (colors[0] === 0 && colors[1] === 0);
     if (!hidden) {
-      const horizontal = layerHorizontals[i];
-
       // Each layer is shifted by some translation
       // To mimic the screen print process
       const layerXY = random.insideCircle(

@@ -11,6 +11,7 @@ const DEFAULT_SIZE = 2048;
 //   return bytes;
 // };
 
+const system = 0x01;
 const config = globalThis.CONFIG || {};
 const W = config.W || globalThis;
 const AUTO = "auto";
@@ -74,7 +75,7 @@ if (typeof hl !== "undefined" && hl.tx && hl.tx.customMintData) {
 }
 
 if (!encoding) {
-  encoding = createRandomCleanEncoding();
+  encoding = createRandomCleanEncoding(undefined, { system });
 }
 
 if (config.L !== false) console.log(encodingToHex(encoding));

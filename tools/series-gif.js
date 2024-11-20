@@ -21,12 +21,12 @@ import { PRNG } from "../src/prng.js";
 const { GIFEncoder, quantize, applyPalette } = GIFEnc;
 const prng = PRNG();
 
-const fps = 5;
-const totalFrames = 10;
+const fps = 10;
+const totalFrames = 60;
 const size = 2048;
 
-const system = 1;
-const renderToGif = true;
+const system = 0;
+const renderToGif = false;
 const margin = true;
 const zoom = false;
 const scale = 1;
@@ -43,11 +43,13 @@ for (let i = 0; i < totalFrames; i++) {
 
   const context = canvas.getContext("2d");
   renderToCanvas({
+    colorSpace: "srgb",
     encoding,
     width: canvas.width,
     height: canvas.height,
     context,
     hatch: true,
+    hatchContours: true,
   });
 
   const width = size;

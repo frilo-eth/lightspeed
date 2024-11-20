@@ -389,12 +389,14 @@ export function renderToCanvas(opts = {}) {
       // context.fillRect(m, m, width - m * 2, height - m * 2);
     },
     fill: (path, color, alpha) => {
+      context.save();
       context.fillStyle = color;
       context.globalAlpha = alpha;
       context.beginPath();
       path.forEach((p) => context.lineTo(p[0], p[1]));
       context.closePath();
       context.fill();
+      context.restore();
     },
     // cell: (x, y, w, h, color) => {
     //   context.strokeStyle = color;
@@ -402,6 +404,7 @@ export function renderToCanvas(opts = {}) {
     //   context.strokeRect(x, y, w, h);
     // },
     segment: (a, b, color, alpha, lineWidth) => {
+      context.save();
       context.strokeStyle = color;
       context.globalAlpha = alpha;
       context.lineWidth = lineWidth;
@@ -409,6 +412,7 @@ export function renderToCanvas(opts = {}) {
       context.moveTo(a[0], a[1]);
       context.lineTo(b[0], b[1]);
       context.stroke();
+      context.restore();
     },
   });
 }

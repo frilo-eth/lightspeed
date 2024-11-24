@@ -4,6 +4,37 @@
 
 Bitframes is an open source codec for generative art, contained within 32 bytes of data. Each stream of 32 bytes represents a single composition, that can be realized as a digital or print artwork. This repository contains the technical details and codec specification, but more details about the release of the artwork, and how it is being used to help crowdfund a documentary film about the history of Generative Art, can be found on the Bitframes website (will be released shortly).
 
+## Demo
+
+See [the CodeSandbox demo](https://codesandbox.io/p/sandbox/bitframes-sketch-vsqx9l) for an example of some basic functionality.
+
+## Example
+
+An example of rendering a hex string:
+
+`"00000611fa0e90453d10ee8045016b0737b7d87e4b016db5b2d22401dde6ff01"`
+
+```js
+import { renderToCanvas, hexToEncoding } from "bitframes";
+
+const context = canvas.getContext("2d", { colorSpace: "display-p3" });
+
+const encoding = hexToEncoding(
+  "00000611fa0e90453d10ee8045016b0737b7d87e4b016db5b2d22401dde6ff01"
+);
+
+renderToCanvas({
+  context,
+  width,
+  height,
+  encoding,
+  // on by default, but you can disable for low-res pixelated rendering
+  hatch: true,
+});
+```
+
+The above code should match the output of [token #295](https://bitframes.io/gallery/token/295).
+
 ## Codec
 
 The codec for the artwork is described in [./docs/codec.md](./docs/codec.md).

@@ -22,7 +22,7 @@ const { GIFEncoder, quantize, applyPalette } = GIFEnc;
 const prng = PRNG();
 
 const fps = 10;
-const totalFrames = 60;
+const totalFrames = 1000;
 const size = 2048;
 
 const system = 0;
@@ -71,7 +71,8 @@ for (let i = 0; i < totalFrames; i++) {
     gif.writeFrame(index, width, height, { palette, delay: 1000 / fps });
   } else {
     const png = encode({ width, height, data: imageData.data }, deflate);
-    await writeFile(`tmp/${String(i).padStart(4, "0")}.png`, png);
+    await writeFile(`tmp/batch/${encodingToHex(encoding)}.png`, png);
+    // await writeFile(`tmp/${String(i).padStart(4, "0")}.png`, png);
   }
 }
 

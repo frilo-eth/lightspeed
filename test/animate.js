@@ -5,8 +5,16 @@ import {
   createRandomCleanEncoding,
   createRandomVisibleEncoding,
 } from "../src/util";
-import { encodingToHex, hexToEncoding } from "../src/codec";
+import {
+  decode,
+  encode,
+  encodingToHex,
+  FillMode,
+  hexToEncoding,
+  FlipMode,
+} from "../src/codec";
 import { getPalette } from "../src/colors";
+import { binaryStringToByteLE } from "../src/bits";
 
 const random = PRNG();
 
@@ -23,12 +31,40 @@ const settings = {
 };
 
 const sketch = (props) => {
-  // const encoding = hexToEncoding(
-  //   "01008378ca1eb972010a48fd95ce05197944d609839c92d96b6f838df30dcaaa"
+  let encoding = hexToEncoding(
+    "00000611fa0e90453d10ff8045016b0737b7d87e4b016db5b2d22401dde6ff01"
+  );
+  // const alt = decode(
+  //   hexToEncoding(
+  //     "0000e50bcec172ea2e8324b24a32024881f7850ffa66327a766a7287a4bb7b9f"
+  //   )
   // );
-  const encoding = createRandomCleanEncoding(random, {
-    system: 1,
-  });
+
+  // const encoding = createRandomCleanEncoding(random, {
+  //   system: 1,
+  // });
+
+  const doc = decode(encoding);
+  // doc.layers[2].flipMode = FlipMode.BOTH;
+  doc.layers[1].dimensions = [14, 14];
+  // doc.layers[1].pattern = binaryStringToByteLE("00000001");
+  // doc.layers[1].skip = 0;
+  // doc.layers[1].scale = 1;
+  // doc.layers[1].fillMode = FillMode.CENTER;
+  // doc.layers[1].wrap = false;
+
+  // pattern,
+  // rule,
+  // scale: scaleAndSkip[0],
+  // skip: scaleAndSkip[1],
+  // skipMode: flags.skipMode,
+  // fillMode: flags.fillMode,
+  // flipMode: flags.flipMode,
+  // wrap: flags.wrap,
+
+  encoding = encode(doc);
+
+  console.log(encodingToHex(encoding));
   props.update({ suffix: encodingToHex(encoding) });
 
   const stats = renderStats({ encoding });

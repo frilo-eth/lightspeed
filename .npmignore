@@ -6,3 +6,9 @@ node_modules
 LICENSE.md
 tmp/
 *.zip
+*.mp4
+*.gif
+www/
+test/
+docs/
+tools/

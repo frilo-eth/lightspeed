@@ -55,6 +55,8 @@ If the color is out of gamut, it is mapped by reducing the chroma until the poin
 
 In the inverted paletet, the background is black, and the layers use one of three colors: black, white, or gray. After the background, the three shades are repeated evenly across the 15 remaining slots.
 
+> _Note:_ In the Bitframes website and crowdfund, this system is reserved for the 32 Bit Editions. If you try to mint with en encoding using System `0x01`, the blockchain will still store this as `0x00` (default palette).
+
 | Index | Name           | OKLrCH         | sRGB Hex  |
 | ----- | -------------- | -------------- | --------- |
 | 0     | `"background"` | `[0, 0, 0]`    | `#000000` |

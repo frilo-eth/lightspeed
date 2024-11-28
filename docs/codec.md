@@ -26,7 +26,7 @@ Each layer can have independent variables such as COLORS and DIMENSIONS, that de
 
 The SYSTEM flag changes the global palette when rendering: `0` uses the default colorful palette, and `1` leads to an inverted black & white palette. Other values are reserved for future use; this byte could be used to create a new version of this codec that is backwards-compatible.
 
-> _Note:_ For the reference rendering implementation, the SYSTEM flag also determines the amount of surround (margin) that is visible; the SYSTEM `1` has double the margin.
+> _Note:_ In the Bitframes website, the System `0x01` is reserved for the 32 Bit Editions, and minting is only possible on System `0x00` (default palette).
 
 #### FRAME
 

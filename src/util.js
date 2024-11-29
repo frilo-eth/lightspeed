@@ -78,15 +78,15 @@ export function createRandomLayer(random = defaultRandom) {
   return {
     visible: random.boolean(), // 1 bit
     skipMode: randomCrumb(random), // 2 bits
-    fill: randomCrumb(random), // 2 bits
-    flip: randomCrumb(random), // 2 bits
+    fillMode: randomCrumb(random), // 2 bits
+    flipMode: randomCrumb(random), // 2 bits
     wrap: random.boolean(), // 1 bit
     colors: getRandomVisibleColorPair(random), // 8 bits
     dimensions: [randomNibble(random), randomNibble(random)], // 8 bits
     pattern: randomByte(random), // 8 bits
     rule: randomByte(random), // 8 bits
     scale: randomNibble(random), // 4 bits
-    skip: randomNibble(random), // 4 bits
+    skipMode: randomNibble(random), // 4 bits
   };
 }
 

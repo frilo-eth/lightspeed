@@ -131,7 +131,7 @@ The flags that define the ECA are described below:
     - `0x02 (VERTICAL)`: Vertical flip `rows - y - 1`
     - `0x03 (BOTH)`: Both horizontal and vertical flip
   - **Grid Dimensions**: Turn the DIMENSIONS nibbles into a `(columns, rows)` tuple, by indexing into the fixed grid sizes (16 first factors of 768)
-  - **Pattern Scale**: Compute a `patternScale` value. If `SCALE` is zero, set this value to 8, otherwise multiply `SCALE` by the number of `columns` in the grid
+  - **Pattern Scale**: Compute a `patternScale` value from `SCALE`. If `SCALE` is zero, set this value to 8, otherwise multiply `SCALE` by the number of `columns` in the grid
   - **Skip Value**: Compute a `skipBoundary` value. After every `skipBoundary` cells iterated upon, increment the iterator by `skip` number of cells (therefore skipping some from being shown)
     - `0x00 (BINARY)`: `skipBoundary` will be 8 (length of the binary PATTERN)
     - `0x01 (COLUMNS)`: `skipBoundary` will be the length of `columns`

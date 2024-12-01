@@ -5,9 +5,11 @@ import { renderStats } from "./render.js";
 // non-deterministic pure JS environment randomness
 const defaultRandom = PRNG(false);
 
-const randomNibble = (random = defaultRandom) => random.rangeFloor(0, 16);
-const randomByte = (random = defaultRandom) => random.rangeFloor(0, 256);
-const randomCrumb = (random = defaultRandom) => random.pick([0, 1, 2, 3]);
+export const randomNibble = (random = defaultRandom) =>
+  random.rangeFloor(0, 16);
+export const randomByte = (random = defaultRandom) => random.rangeFloor(0, 256);
+export const randomCrumb = (random = defaultRandom) =>
+  random.pick([0, 1, 2, 3]);
 
 export function createRandomCleanEncoding(prng = defaultRandom, opts = {}) {
   let encoding, stats;
@@ -77,16 +79,16 @@ export function createRandomEncoding(
 export function createRandomLayer(random = defaultRandom) {
   return {
     visible: random.boolean(), // 1 bit
-    skipMode: randomCrumb(random), // 2 bits
-    fillMode: randomCrumb(random), // 2 bits
-    flipMode: randomCrumb(random), // 2 bits
-    wrap: random.boolean(), // 1 bit
     colors: getRandomVisibleColorPair(random), // 8 bits
     dimensions: [randomNibble(random), randomNibble(random)], // 8 bits
     pattern: randomByte(random), // 8 bits
     rule: randomByte(random), // 8 bits
     scale: randomNibble(random), // 4 bits
-    skipMode: randomNibble(random), // 4 bits
+    skip: randomNibble(random), // 4 bits
+    skipMode: randomCrumb(random), // 2 bits
+    fillMode: randomCrumb(random), // 2 bits
+    flipMode: randomCrumb(random), // 2 bits
+    wrap: random.boolean(), // 1 bit
   };
 }
 

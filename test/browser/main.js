@@ -12,27 +12,14 @@ import {
   PRNG,
   binaryStringToByteLE,
   StandardRules,
+  randomByte,
+  randomNibble,
+  randomCrumb,
+  encodingToHex,
 } from "../../src/index.js";
+import { downloadCanvas } from "./save.js";
 
-const prng = PRNG();
-
-const createBaseLayer = () => {};
-
-let doc = decode(createEmptyEncoding());
-doc.layers[0] = createRandomLayer();
-// doc.layers[0].visible = true;
-// doc.layers[0].colors = [0, 1];
-// doc.layers[0].dimensions = [14, 14];
-// doc.layers[0].skip = 0;
-// doc.layers[0].skipMode = SkipMode.SCALED_COLUMNS;
-// doc.layers[0].rule = StandardRules.IDENTITY;
-// doc.layers[0].pattern = binaryStringToByteLE("10101010");
-// doc.layers[0].scale = 0;
-// doc.layers[0].wrap = false;
-// doc.layers[0].flipMode = FlipMode.VERTICAL;
-// doc.layers[0].fillMode = FillMode.LEFT;
-
-const encoding = encode(doc);
+const random = PRNG();
 
 const canvas = document.createElement("canvas");
 const context = canvas.getContext("2d", { colorSpace: "display-p3" });
@@ -46,10 +33,63 @@ canvas.height = height;
 // canvas.style.imageRendering = "pixelated";
 canvas.style.width = "512px";
 canvas.style.height = "auto";
-renderToCanvas({
-  context,
-  encoding,
-  width,
-  height,
-  hatch: true,
+
+let curEncodingHex;
+
+setInterval(() => {
+  animate();
+}, 1000 / 5);
+animate();
+
+function animate() {
+  const isRandomReverse = false;
+
+  let doc = decode(createEmptyEncoding());
+  const dim = 2;
+  console.log("Dimensions:", getGridSizes()[dim]);
+  doc.layers[1] = {
+    visible: true, // 1 bit
+    colors: [0, 1], // 8 bits
+    dimensions: [dim, dim], // 8 bits
+    pattern: binaryStringToByteLE("10100010"), // 8 bits
+    rule: StandardRules.IDENTITY, // 8 bits
+    scale: 0, // 4 bits
+    skip: 0,
+    skipMode: SkipMode.EQUAL, // 2 bits
+    fillMode: FillMode.CENTER, // 2 bits
+    flipMode: FlipMode.HORIZONTAL, // 2 bits
+    wrap: true, // 1 bit
+  };
+
+  doc.layers[0] = {
+    visible: true, // 1 bit
+    colors: [1, 0], // 8 bits
+    dimensions: [15, 15], // 8 bits
+    pattern: binaryStringToByteLE("01000010"), // 8 bits
+    rule: StandardRules.COMPLEMENT, // 8 bits
+    scale: 0, // 4 bits
+    skip: 0,
+    skipMode: SkipMode.SCALED_COLUMNS, // 2 bits
+    fillMode: FillMode.CENTER, // 2 bits
+    flipMode: FlipMode.NONE, // 2 bits
+    wrap: true, // 1 bit
+  };
+
+  const encoding = encode(doc);
+  curEncodingHex = encodingToHex(encoding);
+  renderToCanvas({
+    context,
+    encoding,
+    width,
+    height,
+    hatch: true,
+  });
+}
+
+canvas.addEventListener("click", (ev) => {
+  ev.preventDefault();
+  console.log(curEncodingHex + ".png");
+  downloadCanvas(canvas, {
+    filename: curEncodingHex + ".png",
+  });
 });

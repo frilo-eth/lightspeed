@@ -17,7 +17,7 @@ import {
   randomCrumb,
   encodingToHex,
 } from "../../src/index.js";
-import { downloadCanvas } from "./save.js";
+import { downloadCanvas } from "../util/save.js";
 
 const random = PRNG();
 

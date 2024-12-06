@@ -1,9 +1,61 @@
+import {
+  readChunks,
+  writeChunks,
+  ChunkType,
+  encode_pHYs_PPI,
+  encode_iTXt,
+  decode_iTXt,
+} from "png-tools";
+import { encodingToHex } from "../../src/index.js";
+
 let link;
 
 export function downloadBuffer(buf, opts = {}) {
   const { filename = "download" } = opts;
   const blob = new Blob([buf], opts);
   return downloadBlob(blob, { filename });
+}
+
+export async function downloadEncoding(canvas, opts = {}) {
+  const { type = "image/png" } = opts;
+  opts = { ...opts, type };
+  let buffer = await canvasToBuffer(canvas, opts);
+  const oldBuffer = buffer;
+  try {
+    let chunks = readChunks(buffer, { copy: false });
+
+    if (opts.encoding) {
+      chunks = chunks.filter((c) => {
+        if (c.type == ChunkType.iTXt) {
+          const decoded = decode_iTXt(c.data);
+          if (decoded.keyword == "encoding") return false;
+        }
+        return true;
+      });
+
+      chunks.splice(1, 0, {
+        type: ChunkType.iTXt,
+        data: encode_iTXt({
+          keyword: "encoding",
+          text: encodingToHex(opts.encoding),
+        }),
+      });
+    }
+
+    if (opts.pixelsPerInch) {
+      chunks.splice(1, 0, {
+        type: ChunkType.pHYs,
+        data: encode_pHYs_PPI(opts.pixelsPerInch),
+      });
+    }
+
+    buffer = writeChunks(chunks);
+  } catch (err) {
+    console.warn(err);
+    buffer = oldBuffer;
+  }
+
+  return downloadBuffer(buffer, opts);
 }
 
 export async function downloadCanvas(canvas, opts = {}) {

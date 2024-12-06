@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body,
+      html {
+        width: 100%;
+        display: flex;
+        box-sizing: border-box;
+        flex-direction: column;
+      }
+      body {
+        display: flex;
+        flex-direction: column;
+        box-sizing: border-box;
+        align-items: flex-start;
+        justify-content: flex-start;
+        gap: 20px;
+        margin: 0px;
+        padding: 20px;
+        font: 14px monospace;
+      }
+      input,
+      button {
+        font: inherit;
+      }
+      label {
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: 10px;
+        width: 100%;
+        box-sizing: border-box;
+        flex-grow: 1;
+        flex-shrink: 0;
+        align-items: center;
+      }
+      .encoding {
+        border: 1px solid black;
+        padding: 10px;
+        width: 100%;
+        box-sizing: border-box;
+        max-width: 600px;
+        outline: 0;
+      }
+      .encoding.invalid {
+        border: 1px solid red;
+      }
+    </style>
+  </head>
+  <body>
+    <label>Encoding: <input type="text" class="encoding" /></label>
+    <script src="./main.js" type="module"></script>
+  </body>
+</html>

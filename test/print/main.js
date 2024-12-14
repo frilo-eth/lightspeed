@@ -17,8 +17,13 @@ import {
   randomCrumb,
   encodingToHex,
   hexToEncoding,
+  renderToSVG,
 } from "../../src/index.js";
-import { downloadCanvas, downloadEncoding } from "../util/save.js";
+import {
+  downloadBlob,
+  downloadCanvas,
+  downloadEncoding,
+} from "../util/save.js";
 import {} from "png-tools";
 import getDocument from "canvas-dimensions";
 
@@ -31,24 +36,30 @@ const settings = {
   units: "in",
 };
 
-const {
-  // Size in display/screen coordinates
-  canvasWidth: width,
-  canvasHeight: height,
-} = getDocument(settings);
+let colorSpace = "display-p3";
 
 const canvas = document.createElement("canvas");
-const context = canvas.getContext("2d", { colorSpace: "display-p3" });
+const context = canvas.getContext("2d", { colorSpace });
 document.body.appendChild(canvas);
-
-// Setup your 2D canvas
-canvas.width = width;
-canvas.height = height;
 
 canvas.style.width = "512px";
 canvas.style.height = "auto";
 
+let format = "png";
+
 const encBox = document.querySelector(".encoding");
+const formatBox = document.querySelector(".format");
+const sizeBox = document.querySelector(".size");
+sizeBox.value = settings.dimensions[0];
+
+const unitsBox = document.querySelector(".units");
+unitsBox.value = settings.units;
+
+const computedSizeLabel = document.querySelector(".computed-size");
+
+formatBox.oninput = updateInputs;
+sizeBox.oninput = updateInputs;
+unitsBox.oninput = updateInputs;
 
 let encoding;
 
@@ -74,9 +85,39 @@ const button = document.createElement("button");
 button.textContent = "Download";
 document.body.appendChild(button);
 
+function updateInputs() {
+  format = formatBox.value.toLowerCase();
+  const units = unitsBox.value || "in";
+  const size = parseFloat(sizeBox.value) || (units == "px" ? 2048 : 18);
+
+  settings.units = units;
+  settings.pixelsPerInch = units == "px" ? undefined : 300;
+  settings.dimensions = [size, size];
+
+  document.querySelector(".print-options").style.display =
+    format == "png" ? "" : "none";
+  update(encoding);
+}
+
 function update(newEncoding) {
   encoding = newEncoding;
   encBox.value = encodingToHex(encoding);
+
+  let {
+    // Size in display/screen coordinates
+    canvasWidth: width,
+    canvasHeight: height,
+  } = getDocument(settings);
+
+  width = Math.round(width);
+  height = Math.round(height);
+
+  // Setup your 2D canvas
+  canvas.width = width;
+  canvas.height = height;
+
+  computedSizeLabel.textContent = `${width} x ${height} px`;
+
   renderToCanvas({
     context,
     encoding,
@@ -86,15 +127,34 @@ function update(newEncoding) {
   });
 }
 
-function click(ev) {
+function save(ev) {
   ev.preventDefault();
   const curEncodingHex = encodingToHex(encoding);
   console.log(curEncodingHex + ".png");
-  downloadEncoding(canvas, {
-    pixelsPerInch: settings.pixelsPerInch,
-    encoding,
-    filename: `print-${curEncodingHex}.png`,
-  });
+  if (format == "png") {
+    downloadEncoding(canvas, {
+      pixelsPerInch: settings.pixelsPerInch,
+      encoding,
+      filename: `print-${curEncodingHex}.png`,
+    });
+  } else {
+    const svg = renderToSVG({
+      colorSpace,
+      width: canvas.width,
+      height: canvas.height,
+      encoding,
+      hatch: true,
+      // you can set this to true if you want a really high quality SVG
+      // however for pen plotting you probably just want actual line strokes rather than outline strokes
+      hatchContours: false,
+    });
+    downloadBlob(
+      new Blob([svg], {
+        type: "image/svg+xml",
+      }),
+      { filename: `svg-${curEncodingHex}.svg` }
+    );
+  }
 }
 
-button.addEventListener("click", click);
+button.addEventListener("click", save);

@@ -48,10 +48,39 @@
       .encoding.invalid {
         border: 1px solid red;
       }
+
+      .print-options {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
     </style>
   </head>
   <body>
     <label>Encoding: <input type="text" class="encoding" /></label>
+    <select class="format">
+      <option>PNG</option>
+      <option>SVG</option>
+    </select>
+    <div class="print-options">
+      <label
+        >Size:
+        <input
+          class="size"
+          type="number"
+          value="18"
+          min="1"
+          max="1000"
+          step="1"
+        />
+        <select class="units">
+          <option>in</option>
+          <option>cm</option>
+          <option>px</option>
+        </select>
+      </label>
+      <label class="computed-size"></label>
+    </div>
     <script src="./main.js" type="module"></script>
   </body>
 </html>

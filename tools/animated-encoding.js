@@ -3,10 +3,7 @@ import { renderToCanvas } from "../src/render.js";
 import { createCanvas } from "canvas";
 import { hexToEncoding } from "../src/codec.js";
 
-// const encoding = createRandomVisibleEncoding();
-const encoding = hexToEncoding(
-  "0000cfa795453ef52753e4f004a9b382490503817fa79e2a5b2e4ebe426935df"
-);
+const encoding = createRandomVisibleEncoding();
 
 const totalFrames = 256;
 

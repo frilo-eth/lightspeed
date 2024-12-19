@@ -8,3 +8,4 @@ www/script.js
 test/xkcd-color-names.txt
 *.mp4
 *.gif
+test/print/dist

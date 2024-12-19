@@ -24,8 +24,9 @@ import {
   downloadCanvas,
   downloadEncoding,
 } from "../util/save.js";
-import {} from "png-tools";
+// import {} from "png-tools";
 import getDocument from "canvas-dimensions";
+import convert from "convert-length";
 
 const settings = {
   // a standard paper size or [w, h]
@@ -147,12 +148,23 @@ function save(ev) {
       // you can set this to true if you want a really high quality SVG
       // however for pen plotting you probably just want actual line strokes rather than outline strokes
       hatchContours: false,
+      // optionally visualize a different line width
+      // lineWidth:
+      //   format == "plotter"
+      //     ? convert(0.03, "cm", "px", {
+      //         roundPixel: false,
+      //         precision: 5,
+      //         pixelsPerInch: 90,
+      //       })
+      //     : undefined,
+      // turn off background for pen plotter
+      background: format == "plotter" ? "none" : undefined,
     });
     downloadBlob(
       new Blob([svg], {
         type: "image/svg+xml",
       }),
-      { filename: `svg-${curEncodingHex}.svg` }
+      { filename: `${format}-${curEncodingHex}.svg` }
     );
   }
 }

@@ -20,8 +20,8 @@
     "dev": "esbuild test/onchain.js --serve --bundle --minify --format=iife --outfile=www/script.js --servedir=www",
     "dev:palette": "esbuild test/vis-palette.js --sourcemap=inline --serve --bundle --minify --format=iife --outfile=www/script.js --servedir=www",
     "dev:animate": "esbuild test/animate.js --sourcemap=inline --serve --bundle --minify --format=iife --outfile=www/script.js --servedir=www",
-    "build": "esbuild test/onchain.js --bundle --minify --format=iife | terser --comments=false --compress --output www/script.js -- && wc -c < www/script.js",
-    "vercel-build": "npm run build && cp -r www/* ."
+    "build": "esbuild test/onchain.js --bundle --minify --format=iife --outfile=www/script.js",
+    "vercel-build": "npm run build"
   },
   "keywords": [
     "lightspeed",

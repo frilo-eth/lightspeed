@@ -1,54 +1,92 @@
-# bitframes
+# Lightspeed ⚡
 
-> 🔧 This repository is a work in progress – please check back in a couple days as it will be more fleshed out.
+**A modern generative art creation tool**
 
-Bitframes is an open source codec for generative art, contained within 32 bytes of data. Each stream of 32 bytes represents a single composition, that can be realized as a digital or print artwork. This repository contains the technical details and codec specification, but more details about the release of the artwork, and how it is being used to help crowdfund a documentary film about the history of Generative Art, can be found on the Bitframes website (will be released shortly).
+Create beautiful algorithmic compositions with intuitive preset controls. Lightspeed combines the power of generative algorithms with user-friendly interfaces, making generative art accessible to both beginners and professionals.
 
-## Demo
+## ✨ Features
 
-See [the CodeSandbox demo](https://codesandbox.io/p/sandbox/bitframes-sketch-vsqx9l) for an example of some basic functionality.
+- **9 Curated Presets** - Each preset focuses on specific layers and color harmonies
+- **5-Layer System** - Complete control over composition depth
+- **Scandinavian Color Palette** - Calm, muted tones for sophisticated artwork
+- **Real-time Controls** - Instant feedback as you create
+- **Multiple Export Formats** - PNG, SVG, and CSV data exports
+- **Keyboard Shortcuts** - Cmd+S to save, Cmd+E to export
+- **Custom Margin Control** - Pixel-perfect padding adjustment
 
-## Example
+## 🎨 Preset Overview
 
-An example of rendering a hex string:
+| Preset | Layers | Colors | Description |
+|--------|--------|--------|-------------|
+| **blocky** | 1-3 | Mixed | Architectural forms with varied color modes |
+| **checker** | 1 | 2 colors | Classic checkered patterns |
+| **mono** | 1 | 1 color | Minimalist single-color compositions |
+| **glitch** | 1-3 | 1 each | Digital distortion effects |
+| **dither** | 1-2 | 1 each | Halftone and texture patterns |
+| **cellular** | 1-2 | 1 each | Organic cellular automata |
+| **dual** | 1 | 2 colors | High contrast dual-color designs |
+| **weave** | 1-3 | First white, others 1 | Textile-inspired patterns |
+| **matrix** | 1-2 | Green tones | Digital rain aesthetics |
 
-`"00000611fa0e90453d10ee8045016b0737b7d87e4b016db5b2d22401dde6ff01"`
+## 🚀 Quick Start
 
-```js
-import { renderToCanvas, hexToEncoding } from "bitframes";
+```bash
+# Clone the repository
+git clone https://github.com/lightspeed-art/lightspeed.git
+cd lightspeed
 
-const context = canvas.getContext("2d", { colorSpace: "display-p3" });
+# Install dependencies
+npm install
 
-const encoding = hexToEncoding(
-  "00000611fa0e90453d10ee8045016b0737b7d87e4b016db5b2d22401dde6ff01"
-);
+# Start development server
+npm run dev
 
-renderToCanvas({
-  context,
-  width,
-  height,
-  encoding,
-  // on by default, but you can disable for low-res pixelated rendering
-  hatch: true,
-});
+# Build for production
+npm run build
 ```
 
-The above code should match the output of [token #295](https://bitframes.io/gallery/token/295).
+Visit `http://localhost:8000` to start creating!
 
-## Codec
+## 🎯 Usage
 
-The codec for the artwork is described in [./docs/codec.md](./docs/codec.md).
+1. **Choose a Preset** - Start with one of the 9 curated presets
+2. **Adjust Layers** - Toggle layer visibility with the dots
+3. **Pick Colors** - Click color swatches to open the color picker
+4. **Fine-tune Composition** - Use individual layer shufflers (⚃)
+5. **Control Margin** - Adjust padding with the margin slider
+6. **Export** - Use Cmd+E or the export button to save your creation
 
-## Crowdfund
+## 🛠️ Development
 
-Bitframes is being released as a month-long public crowdfund ('open edition ERC721 mint') on Ethereum L1, with 100% of all net proceeds from minting being directed toward the development of a feature-length documentary film on the history of Generative Art, being directed by Tordoff Films Ltd in the UK.
+The project uses a modular architecture:
 
-Website and details to be announced shortly.
+- `src/` - Core rendering engine and algorithms
+- `test/onchain.js` - Main application logic
+- `www/` - Web interface and assets
 
-## Running Locally
+## 📦 Deployment
 
-This repository includes a reference implementation in JavaScript, that can be used to render new graphics in Node.js and the browser.
+This project is optimized for static deployment on platforms like:
 
-## License
+- **Vercel** (recommended)
+- **Netlify**
+- **GitHub Pages**
+- **Surge.sh**
 
-MIT, see [LICENSE.md](http://github.com/mattdesl/bitframes/blob/master/LICENSE.md) for details.
+## 🤝 Contributing
+
+We welcome contributions! Whether it's:
+
+- New preset configurations
+- Color palette improvements
+- UI/UX enhancements
+- Performance optimizations
+- Bug fixes
+
+## 📄 License
+
+MIT License - feel free to use this project for personal and commercial purposes.
+
+---
+
+**Created with ❤️ by the Lightspeed Team**

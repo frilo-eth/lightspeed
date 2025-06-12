@@ -1,33 +1,629 @@
 <!doctype html>
-<html lang="">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1, maximum-scale=1"
     />
-    <script src="hl-gen.js"></script>
+    <title>Lightspeed - Generative Art Creation Tool</title>
+    <meta name="description" content="Create beautiful algorithmic compositions with intuitive preset controls. A modern generative art tool for artists and creators." />
+    <meta name="keywords" content="generative art, algorithmic art, composition, creative coding, visual art" />
+    <meta property="og:title" content="Lightspeed - Generative Art Creation Tool" />
+    <meta property="og:description" content="Create beautiful algorithmic compositions with intuitive preset controls" />
+    <meta property="og:type" content="website" />
     <style>
-      html,
-      body {
-        height: 100%;
-        min-height: 100%;
+      * {
+        box-sizing: border-box;
         margin: 0;
         padding: 0;
       }
+
+      body {
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        background: #e9e2d4;
+        color: #333;
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      .header {
+        background: #333;
+        color: white;
+        padding: 6px 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 11px;
+        border-bottom: 1px solid #555;
+        height: 32px;
+      }
+
+      .header h1 {
+        font-size: 14px;
+        letter-spacing: 1px;
+        font-weight: normal;
+      }
+
+      .header .actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .header button {
+        background: #555;
+        color: white;
+        border: none;
+        padding: 3px 8px;
+        font-size: 10px;
+        cursor: pointer;
+        font-family: inherit;
+        text-transform: uppercase;
+      }
+
+      .header button:hover {
+        background: #777;
+      }
+
+      .main-container {
+        display: flex;
+        height: calc(100vh - 32px);
+      }
+
+      .canvas-area {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 16px;
+        background: #e9e2d4;
+      }
+
       canvas {
+        max-width: 100%;
+        max-height: 100%;
+        border: 1px solid #ccc;
+        background: white;
+      }
+
+      .sidebar {
+        width: 280px;
+        background: #f8f8f8;
+        border-left: 1px solid #ddd;
+        display: flex;
+        flex-direction: column;
+        font-size: 11px;
+      }
+
+      .tabs {
+        display: flex;
+        background: #e5e5e5;
+        border-bottom: 1px solid #ccc;
+      }
+
+      .tab {
+        flex: 1;
+        padding: 6px 8px;
+        text-align: center;
+        cursor: pointer;
+        font-size: 10px;
+        font-weight: bold;
+        background: #e5e5e5;
+        border-right: 1px solid #ccc;
+        user-select: none;
+        text-transform: uppercase;
+      }
+
+      .tab:last-child {
+        border-right: none;
+      }
+
+      .tab.active {
+        background: #f8f8f8;
+        border-bottom: 1px solid #f8f8f8;
+      }
+
+      .tab-content {
+        flex: 1;
+        padding: 12px;
+        overflow-y: auto;
+        font-size: 10px;
+      }
+
+      .tab-panel {
+        display: none;
+      }
+
+      .tab-panel.active {
         display: block;
+      }
+
+      .control-group {
+        margin-bottom: 12px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #e5e5e5;
+      }
+
+      .control-group:last-child {
+        border-bottom: none;
+      }
+
+      .control-group h3 {
+        font-size: 10px;
+        margin-bottom: 6px;
+        color: #666;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: bold;
+      }
+
+      .control-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 4px;
+      }
+
+      .control-row label {
+        min-width: 50px;
+        font-size: 9px;
+        color: #666;
+      }
+
+      input, select, button {
+        font-family: inherit;
+        font-size: 9px;
+      }
+
+      input[type="checkbox"] {
+        transform: scale(0.7);
+      }
+
+      input[type="range"] {
+        flex: 1;
+      }
+
+      button {
+        background: #ddd;
+        color: #333;
+        border: 1px solid #bbb;
+        padding: 3px 6px;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 9px;
+      }
+
+      button:hover {
+        background: #ccc;
+      }
+
+      button.secondary {
+        background: #eee;
+        color: #666;
+      }
+
+      button.secondary:hover {
+        background: #ddd;
+      }
+
+      .color-swatch {
+        width: 16px;
+        height: 16px;
+        border: 1px solid #999;
+        cursor: pointer;
+        display: inline-block;
+        margin-right: 2px;
+        background-size: 8px 8px;
+      }
+
+      .gallery-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+        gap: 4px;
+      }
+
+      .gallery-item {
+        aspect-ratio: 1;
+        border: 1px solid #ccc;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        background: white;
+      }
+
+      .gallery-item canvas {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .gallery-item:hover {
+        border-color: #666;
+      }
+
+      .data-textarea {
+        width: 100%;
+        height: 120px;
+        font-family: inherit;
+        font-size: 8px;
+        padding: 6px;
+        border: 1px solid #ccc;
+        resize: vertical;
+        background: white;
+      }
+
+      .function-buttons {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2px;
+        margin-bottom: 8px;
+      }
+
+      .function-buttons button {
+        padding: 2px 4px;
+        font-size: 8px;
+        position: relative;
+      }
+
+      .function-buttons button:hover::after {
+        content: attr(title);
         position: absolute;
-        top: 0;
-        bottom: 0;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #333;
+        color: white;
+        padding: 2px 6px;
+        font-size: 7px;
+        white-space: nowrap;
+        border-radius: 2px;
+        z-index: 100;
+      }
+
+      .layer-controls {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin-bottom: 3px;
+        padding: 2px 4px;
+        background: white;
+        border: 1px solid #ddd;
+      }
+
+      .layer-controls input[type="checkbox"] {
+        margin: 0;
+      }
+
+      .layer-label {
+        font-size: 9px;
+        color: #666;
+        flex: 1;
+      }
+
+      .visible-controls {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin-bottom: 6px;
+      }
+
+      .visible-dot {
+        width: 12px;
+        height: 12px;
+        border: 1px solid #999;
+        cursor: pointer;
+        display: inline-block;
+      }
+
+      .visible-dot.filled {
+        background: #333;
+      }
+
+      .visible-dot.empty {
+        background: transparent;
+      }
+
+      .composition-controls {
+        display: flex;
+        gap: 2px;
+        margin-bottom: 6px;
+      }
+
+      .composition-controls .icon-btn {
+        width: 16px;
+        height: 16px;
+        border: 1px solid #999;
+        background: white;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 8px;
+      }
+
+      .random-btn {
+        position: absolute;
+        bottom: 16px;
+        right: 16px;
+        width: 60px;
+        height: 24px;
+        background: #333;
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 9px;
+        text-transform: uppercase;
+        border-radius: 2px;
+      }
+
+      .export-controls {
+        display: flex;
+        gap: 4px;
+        margin-top: 6px;
+      }
+
+      .export-controls button {
+        flex: 1;
+        font-size: 8px;
+        padding: 2px 4px;
+      }
+
+      /* Export Modal */
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
         left: 0;
-        right: 0;
-        padding: 0;
-        margin: auto;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+      }
+
+      .modal-content {
+        background-color: #f8f8f8;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 300px;
+        font-family: inherit;
+        font-size: 11px;
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #ddd;
+      }
+
+      .close {
+        color: #aaa;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      .close:hover {
+        color: #000;
+      }
+
+      .export-options {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .export-options button {
+        padding: 8px 16px;
+        font-size: 10px;
+        text-transform: uppercase;
+      }
+
+      /* Color Picker Modal */
+      .color-picker-modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+      }
+
+      .color-picker-content {
+        background-color: #f8f8f8;
+        margin: 10% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 320px;
+        font-family: inherit;
+        font-size: 11px;
+      }
+
+      .color-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        margin: 16px 0;
+      }
+
+      .color-option {
+        width: 40px;
+        height: 40px;
+        border: 2px solid #999;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+      }
+
+      .color-option:hover {
+        border-color: #333;
+      }
+
+      .color-option.selected {
+        border-color: #000;
+        border-width: 3px;
+      }
+
+      .color-option.no-color {
+        background: repeating-linear-gradient(
+          45deg,
+          transparent,
+          transparent 3px,
+          #ccc 3px,
+          #ccc 4px
+        );
+      }
+
+      .color-option.no-color::after {
+        content: "×";
+        font-size: 20px;
+        color: #666;
+        font-weight: bold;
       }
     </style>
   </head>
   <body>
+    <div class="header">
+      <h1>LIGHTSPEED</h1>
+      <div class="actions">
+        <button id="shuffleBtn">🎲 SHUFFLE</button>
+        <button id="exportBtn">📥 EXPORT</button>
+      </div>
+    </div>
+
+    <div class="main-container">
+      <div class="canvas-area">
+        <canvas id="mainCanvas" width="1024" height="1024"></canvas>
+        <button class="random-btn" id="randomBtn">RANDOM</button>
+      </div>
+
+      <div class="sidebar">
+        <div class="tabs">
+          <div class="tab active" data-tab="edit">EDIT</div>
+          <div class="tab" data-tab="data">DATA</div>
+          <div class="tab" data-tab="history">HISTORY</div>
+        </div>
+
+        <div class="tab-content">
+          <!-- EDIT TAB -->
+          <div id="edit-panel" class="tab-panel active">
+            <div class="control-group">
+              <h3>- PRESETS</h3>
+              <div class="function-buttons">
+                <button onclick="applyPreset('blocky')" title="Layers 1-3, mixed colors">blocky</button>
+                <button onclick="applyPreset('checker')" title="Layer 1 only, 2 colors">checker</button>
+                <button onclick="applyPreset('mono')" title="Layer 1 only, 1 color, B&W">mono</button>
+                <button onclick="applyPreset('glitch')" title="Layers 1-3, 1 color each">glitch</button>
+                <button onclick="applyPreset('dither')" title="Layers 1-2, 1 color each">dither</button>
+                <button onclick="applyPreset('cellular')" title="Layers 1-2, 1 color each">cellular</button>
+                <button onclick="applyPreset('dual')" title="Layer 1 only, 2 colors">dual</button>
+                <button onclick="applyPreset('weave')" title="Layers 1-3, 1st layer white, others 1 color">weave</button>
+                <button onclick="applyPreset('matrix')" title="Layers 1-2, 1 color each, green">matrix</button>
+              </div>
+            </div>
+
+            <div class="control-group">
+              <h3>- LAYERS</h3>
+              <div class="control-row">
+                <label>Margin</label>
+                <input type="range" id="marginSlider" min="0" max="100" value="10" />
+                <span id="marginValue">10px</span>
+              </div>
+              <div class="visible-controls">
+                <span style="font-size: 9px; color: #666;">Visible</span>
+                <div id="visible-dots"></div>
+              </div>
+              <div id="layer-colors"></div>
+            </div>
+
+            <div class="control-group">
+              <h3>- FUNCTIONS</h3>
+              <div class="function-buttons">
+                <button onclick="shuffleFunction('colors')">shuffle_colors</button>
+                <button onclick="shuffleFunction('grid')">shuffle_grid</button>
+                <button onclick="shuffleFunction('rules')">shuffle_rules</button>
+                <button onclick="shuffleFunction('scale')">shuffle_scale</button>
+                <button onclick="shuffleFunction('skip')">shuffle_skip</button>
+                <button onclick="shuffleFunction('patterns')">shuffle_patterns</button>
+                <button onclick="shuffleFunction('layers')">shuffle_layers</button>
+                <button onclick="shuffleFunction('flip')">shuffle_flip</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- DATA TAB -->
+          <div id="data-panel" class="tab-panel">
+            <div class="control-group">
+              <h3>- ENCODING</h3>
+              <textarea id="encodingData" class="data-textarea" placeholder="Encoding data will appear here..."></textarea>
+              <div class="export-controls">
+                <button onclick="exportCSV()">Export CSV</button>
+                <button onclick="exportSVG()">Export SVG</button>
+                <button onclick="exportPNG()">Export PNG</button>
+              </div>
+              <div style="margin-top: 6px;">
+                <button onclick="importCSV()" class="secondary" style="width: 100%;">Import CSV</button>
+              </div>
+            </div>
+
+            <div class="control-group">
+              <h3>- SHARE</h3>
+              <input type="text" id="shareUrl" readonly style="width: 100%; margin-bottom: 6px; font-size: 8px;" placeholder="Share URL will appear here">
+              <button onclick="copyShareUrl()" style="width: 100%;">Copy URL</button>
+            </div>
+          </div>
+
+          <!-- HISTORY TAB -->
+          <div id="history-panel" class="tab-panel">
+            <div class="control-group">
+              <h3>- GALLERY</h3>
+              <div style="margin-bottom: 8px; display: flex; gap: 4px;">
+                <button onclick="addToHistory()">Save Current</button>
+                <button onclick="clearHistory()" class="secondary">Clear All</button>
+              </div>
+              <div id="gallery-grid" class="gallery-grid"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Export Modal -->
+    <div id="exportModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 style="margin: 0; font-size: 12px; text-transform: uppercase;">Select Export Format</h3>
+          <span class="close" id="closeModal">&times;</span>
+        </div>
+        <div class="export-options">
+          <button onclick="exportPNG()">PNG (High Quality)</button>
+          <button onclick="exportSVG()">SVG (Vector)</button>
+          <button onclick="exportCSV()">CSV (Data)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Color Picker Modal -->
+    <div id="colorPickerModal" class="color-picker-modal">
+      <div class="color-picker-content">
+        <div class="modal-header">
+          <h3 style="margin: 0; font-size: 12px; text-transform: uppercase;">Select a color...</h3>
+          <span class="close" id="closeColorPicker">&times;</span>
+        </div>
+        <div id="colorGrid" class="color-grid">
+          <!-- Color options will be populated by JavaScript -->
+        </div>
+      </div>
+    </div>
+
     <script src="script.js"></script>
   </body>
 </html>

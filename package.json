@@ -1,13 +1,12 @@
 {
-  "name": "bitframes",
-  "version": "1.0.2",
-  "description": "a renderer for the bitframes artwork",
+  "name": "lightspeed",
+  "version": "1.0.0",
+  "description": "A modern generative art creation tool - Create beautiful algorithmic compositions with intuitive preset controls",
   "type": "module",
   "main": "./src/index.js",
   "license": "MIT",
   "author": {
-    "name": "Matt DesLauriers",
-    "url": "https://github.com/mattdesl"
+    "name": "Lightspeed Team"
   },
   "dependencies": {
     "@noble/hashes": "^1.5.0",
@@ -24,24 +23,23 @@
     "build": "esbuild test/onchain.js --bundle --minify --format=iife | terser --comments=false --compress --output www/script.js -- && wc -c < www/script.js"
   },
   "keywords": [
-    "bitframes",
-    "artwork",
-    "gen",
-    "gen",
-    "art",
-    "generative",
-    "2d",
+    "lightspeed",
+    "generative-art",
+    "algorithmic",
+    "composition",
+    "art-creation",
+    "visual-art",
     "canvas",
-    "realtime",
-    "algorithmic"
+    "javascript",
+    "creative-coding"
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/mattdesl/bitframes.git"
+    "url": "git://github.com/lightspeed-art/lightspeed.git"
   },
-  "homepage": "https://github.com/mattdesl/bitframes",
+  "homepage": "https://lightspeed.art",
   "bugs": {
-    "url": "https://github.com/mattdesl/bitframes/issues"
+    "url": "https://github.com/lightspeed-art/lightspeed/issues"
   },
   "devDependencies": {
     "canvas": "^2.11.2",
